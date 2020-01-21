@@ -184,7 +184,8 @@ tooldir_java=$JAVA_HOME/bin
 tooldir_jre=$JRE_HOME/bin
 
 for dir in ""${!tooldir_*}""; do
-  PATH=$(eval echo '$'{$dir}:$PATH)
+  # PATH=$(eval echo '$'{$dir}:$PATH)
+  PATH=${!dir}:$PATH
 done
 
 
