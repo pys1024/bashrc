@@ -185,7 +185,8 @@ tooldir_jre=$JRE_HOME/bin
 
 for dir in ""${!tooldir_*}""; do
   # PATH=$(eval echo '$'{$dir}:$PATH)
-  PATH=${!dir}:$PATH
+  # PATH=${!dir}:$PATH
+  echo $PATH | grep -q -E "(^|:)${!dir}[:$]" || PATH=${!dir}:$PATH
 done
 
 
