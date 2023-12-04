@@ -82,7 +82,7 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # some more ls aliases
-alias ll='ls -alF'
+alias ll='ls -ahlF'
 alias la='ls -A'
 alias l='ls -CF'
 
@@ -90,8 +90,8 @@ export HISTCONTROL=
 export HISTTIMEFORMAT="%s "
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
-alias alert='notify-send --urgency=low -t 30000 -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\''|xargs -i echo $(date +%s) $(pwd) {}|awk '\''{printf "%s %s %s %s %s %s\n\nDir: %s\nElapsed Time: %d:%d:%d\nSopt Time: ",$4,$5,$6,$7,$8,$9,$2, ($1-$3)/3600,($1-$3)/3600,($1-$3)%3600/60,($1-$3)%60}'\''|sed -e '\''s;/home/pengyongsheng;~;'\'')$(date +%T)"'
-alias alert1='notify-send --urgency=critical -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert1$//'\''|xargs -i echo $(date +%s) $(pwd) {}|awk '\''{printf "%s %s %s %s %s %s\n\nDir: %s\nElapsed Time: %d:%d:%d\nSopt Time: ",$4,$5,$6,$7,$8,$9,$2, ($1-$3)/3600,($1-$3)/3600,($1-$3)%3600/60,($1-$3)%60}'\''|sed -e '\''s;/home/pengyongsheng;~;'\'')$(date +%T)"'
+alias alert='notify-send --urgency=low -t 30000 -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\''|xargs -i echo $(date +%s) $(pwd) {}|awk '\''{printf "%s %s %s %s %s %s\n\nDir: %s\nElapsed Time: %d:%d:%d\nSopt Time: ",$4,$5,$6,$7,$8,$9,$2, ($1-$3)/3600,($1-$3)/3600,($1-$3)%3600/60,($1-$3)%60}'\''|sed -e '\''s;$HOME;~;'\'')$(date +%T)"'
+alias alert1='notify-send --urgency=critical -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert1$//'\''|xargs -i echo $(date +%s) $(pwd) {}|awk '\''{printf "%s %s %s %s %s %s\n\nDir: %s\nElapsed Time: %d:%d:%d\nSopt Time: ",$4,$5,$6,$7,$8,$9,$2, ($1-$3)/3600,($1-$3)/3600,($1-$3)%3600/60,($1-$3)%60}'\''|sed -e '\''s;$HOME;~;'\'')$(date +%T)"'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -182,19 +182,50 @@ tooldir_home=~/bin
 tooldir_homebin=~/bin/bin
 tooldir_java=$JAVA_HOME/bin
 tooldir_jre=$JRE_HOME/bin
+tooldir_nodejs=~/workspace/node-v14.17.3-linux-x64/bin
+tool_pending_pio=~/.platformio/penv/bin
 
+# append directory in the end
+for dir in ""${!tool_pending_*}""; do
+  # PATH=$(eval echo '$'{$dir}:$PATH)
+  # PATH=${!dir}:$PATH
+  echo $PATH | grep -q -E "(^|:)${!dir}[:$]" || PATH=${PATH}:${!dir}
+done
+# insert directory in the begining
 for dir in ""${!tooldir_*}""; do
   # PATH=$(eval echo '$'{$dir}:$PATH)
   # PATH=${!dir}:$PATH
   echo $PATH | grep -q -E "(^|:)${!dir}[:$]" || PATH=${!dir}:$PATH
 done
 
-
 ec_func () {
-    emacsclient "$@" &
+    emacsclient "$@" &> /dev/null &
 }
 bc_func () {
     bcompare "$@" &> /dev/null &
 }
+mtime () {
+    local start_t=$(date +%s)
+    bash -c "$*"
+    local code=$?
+    local end_t=$(date +%s)
+    local elapsed_t=$(date -d @$[$end_t - $start_t - 8*3600] +%T)
+    start_t=$(date -d @${start_t} +"%F %T")
+    end_t=$(date -d @${end_t} +"%F %T")
+    echo
+    [ $code = 0 ] && echo -e "\E[1;32mSUCCESS\E[0m" \
+                          || echo -e "\E[1;31mFAILED\E[0m"
+    echo -e "\E[37mCommand Line: $*\E[0m"
+    echo -e "\E[37mStart   Time: $start_t\E[0m"
+    echo -e "\E[37mEnd     Time: $end_t\E[0m\n"
+    echo -e "\E[1;36mElapsed Time: $elapsed_t\E[0m\n"
+    notify-send --urgency=critical -i "$([ $code = 0 ] && echo terminal || echo error)" "$*"
+}
 alias ec=ec_func
 alias bc4=bc_func
+alias psg='ps -ef | grep -v grep | grep'
+alias rgf='rg --files -uuu | rg -i'
+alias rgi='rg -i -uuu'
+alias xargs='xargs -i'
+
+. "$HOME/.cargo/env"
