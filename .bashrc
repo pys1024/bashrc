@@ -231,6 +231,7 @@ alias bc4=bc_func
 alias psg='ps -ef | grep -v grep | grep'
 alias rgf='rg --files -uuu | rg -i'
 alias rgi='rg -i -uuu'
+alias rgv='rg -vi'
 alias xargs='xargs -i'
 
 . "$HOME/.cargo/env"
