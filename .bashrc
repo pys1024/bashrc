@@ -224,14 +224,48 @@ mtime () {
     echo -e "\E[37mStart   Time: $start_t\E[0m"
     echo -e "\E[37mEnd     Time: $end_t\E[0m\n"
     echo -e "\E[1;36mElapsed Time: $elapsed_t\E[0m\n"
-    notify-send --urgency=critical -i "$([ $code = 0 ] && echo terminal || echo error)" "$*"
+    local info=$(echo -e "$*\n\nStart   Time: $start_t\nEnd     Time: $end_t\nElapsed Time: $elapsed_t")
+    info="$*"
+    notify-send --urgency=critical -i "$([ $code = 0 ] && echo terminal || echo error)" "$info"
+}
+psk () {
+    force=false
+    pattern=$1
+    if [ x"$1" = x"-f" ]; then
+        force=true
+        pattern=$2
+    fi
+    num=$(ps -ef | grep -v grep | grep -i "$pattern" | wc -l)
+    if [ $num -eq 0 ]; then
+        echo -e "\033[1;31mNo process matches!\033[0m"
+    elif [ $num -eq 1 ]; then
+        if [ x"$force" = x"true" ]; then
+            ans=y
+        else
+            ps -ef | grep -v grep | grep -i "$pattern"
+            echo
+            read -p "Are you sure to kill the process? [Y/N] " ans
+        fi
+        if [ x"$ans" = x"y" ] || [ x"$ans" = x"Y" ]; then
+            pid=$(ps -ef | grep -v grep | grep -i "$pattern" | awk '{print $2}')
+            pgid=$(ps -efj | grep -v grep | grep -i "$pattern" | awk '{print $4}')
+            #kill $pid
+            kill -- -$pgid
+            echo -e "\033[1;32mProcess($pid) is killed!\033[0m"
+        fi
+    else
+        echo -e "\033[1;33mMore than one process matches:\033[0m"
+        ps -ef | grep -v grep | grep -i "$pattern"
+    fi
 }
 alias ec=ec_func
 alias bc4=bc_func
-alias psg='ps -ef | grep -v grep | grep'
+alias psg='ps -ef | grep -v grep | grep -i'
 alias rgf='rg --files -uuu | rg -i'
 alias rgi='rg -i -uuu'
 alias rgv='rg -vi'
 alias xargs='xargs -i'
+export -f psk
+export -f mtime
 
-. "$HOME/.cargo/env"
+[ -r $HOME/.cargo/env ] && . $HOME/.cargo/env
