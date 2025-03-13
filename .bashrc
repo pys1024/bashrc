@@ -258,6 +258,25 @@ psk () {
         ps -ef | grep -v grep | grep -i "$pattern"
     fi
 }
+adbs() {
+    if [ -n "$ANDROID_SERIAL" ]; then
+        echo -e "Current device: \E[1;34m$ANDROID_SERIAL\E[0m"
+    fi
+    if [[ $1 =~ ^[0-9]$ ]]; then
+        n=$1
+    else
+        adb devices | grep -v "List of devices" | awk 'NF {print NR, $1}'
+        echo
+        read -p "Choose Once of the Devices Above to Use: " n
+    fi
+    if [[ $n =~ ^[0-9]$ ]]; then
+        serial=$(adb devices | grep -v "List of devices" | awk "NR==$n {print \$1}")
+        if [ -n $serial ]; then
+            echo -e "Device to be used: \E[1;32m$serial\E[0m"
+            export ANDROID_SERIAL=$serial
+        fi
+    fi
+}
 alias ec=ec_func
 alias bc4=bc_func
 alias psg='ps -ef | grep -v grep | grep -i'
@@ -265,7 +284,11 @@ alias rgf='rg --files -uuu | rg -i'
 alias rgi='rg -i -uuu'
 alias rgv='rg -vi'
 alias xargs='xargs -i'
+alias fdu='fdfind -u'
+alias mwatch='watch -g ps oargs= -p'
 export -f psk
 export -f mtime
 
 [ -r $HOME/.cargo/env ] && . $HOME/.cargo/env
+
+[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X" # boot up x-cmd.
