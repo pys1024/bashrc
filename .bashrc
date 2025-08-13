@@ -251,7 +251,12 @@ psk () {
             pgid=$(ps -efj | grep -v grep | grep -i "$pattern" | awk '{print $4}')
             #kill $pid
             kill -- -$pgid
-            echo -e "\033[1;32mProcess($pid) is killed!\033[0m"
+            num=$(ps -ef | grep -v grep | grep -i "$pattern" | wc -l)
+	    if [ $num -eq 0]; then
+	        echo -e "\033[1;32mProcess($pid) is killed!\033[0m"
+	    else
+	        echo -e "\033[1;33mFailed to kill process!$pid)!\033[0m"
+	    fi
         fi
     else
         echo -e "\033[1;33mMore than one process matches:\033[0m"
@@ -272,9 +277,12 @@ adbs() {
     if [[ $n =~ ^[0-9]$ ]]; then
         serial=$(adb devices | grep -v "List of devices" | awk "NR==$n {print \$1}")
         if [ -n $serial ]; then
-            echo -e "Device to be used: \E[1;32m$serial\E[0m"
+            echo -e "Device is selected: \E[1;32m$serial\E[0m"
             export ANDROID_SERIAL=$serial
         fi
+    else
+        echo -e "Unset device: \E[1;32m$ANDROID_SERIAL\E[0m"
+	unset ANDROID_SERIAL
     fi
 }
 alias ec=ec_func
@@ -284,7 +292,7 @@ alias rgf='rg --files -uuu | rg -i'
 alias rgi='rg -i -uuu'
 alias rgv='rg -vi'
 alias xargs='xargs -i'
-alias fdu='fdfind -u'
+alias fdu='fdfind -up'
 alias mwatch='watch -g ps oargs= -p'
 export -f psk
 export -f mtime
