@@ -300,3 +300,7 @@ export -f mtime
 [ -r $HOME/.cargo/env ] && . $HOME/.cargo/env
 
 [ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X" # boot up x-cmd.
+
+export RUSTUP_DIST_SERVER=https://rsproxy.cn
+export RUSTUP_UPDATE_ROOT=https://rsproxy.cn/rustup
+
